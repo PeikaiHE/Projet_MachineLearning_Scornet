@@ -7,7 +7,7 @@ import time
 import warnings
 warnings.filterwarnings('ignore')
 
-data = pd.read_csv('./Projet_MachineLearning_Scornet/optiver-trading-at-the-close/train.csv')
+data = pd.read_csv('/Users/hepeikai/Library/CloudStorage/OneDrive-个人/Master_ISDS_Sorbonne/S3/Apprentissage Statistique_/Projet_MachineLearning_Scornet/optiver-trading-at-the-close/train.csv')
 
 data.info()
 
