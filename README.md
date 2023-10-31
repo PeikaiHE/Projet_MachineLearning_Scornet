@@ -10,7 +10,6 @@
 - 任务3: 模型训练，模型融合
 
 ## Columns description
-`Unnamed`: an index or identifier. 
 
 `stock_id`': A unique identifier for the stock. 
 
@@ -82,4 +81,4 @@
 为什么要这样计算？在金融竞赛和策略中，投资者和交易员通常不仅关心股票本身的价格变化，还关心它与市场或某个参考指数的相对变化。这有助于他们了解股票的相对表现和潜在的alpha（超额回报）。这个target变量就是为了捕捉这种相对表现。
 
 `time_id`: Appears to be another time-related identifier.\
-`row_id`: A combined identifier.\
+`row_id`: A combined identifier.
