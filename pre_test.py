@@ -6,23 +6,12 @@ import seaborn as sns
 import time
 import warnings
 warnings.filterwarnings('ignore')
+path = "/Users/hepeikai/Library/CloudStorage/OneDrive-个人/Master_ISDS_Sorbonne/S3/Apprentissage Statistique_/data/"
 
-data = pd.read_csv('/Users/hepeikai/Library/CloudStorage/OneDrive-个人/Master_ISDS_Sorbonne/S3/Apprentissage Statistique_/Projet_MachineLearning_Scornet/optiver-trading-at-the-close/train.csv')
+data = pd.read_csv(path+"train.csv")
 
 data.info()
 
 missing_values = data.isnull().sum()
 
 data_describe = data.describe()
-
-plt.figure(figsize=(12, 6))
-sns.histplot(np.log(data['imbalance_size']), bins=100, kde=True) #这里的np.log是为了让数据更加平滑
-plt.title('Distribution of Imbalance Size')
-plt.xlabel('Imbalance Size')
-plt.ylabel('Frequency')
-plt.grid(True)
-plt.tight_layout()
-plt.show()
-
-correlation_matrix = data.corr()
-target_correlation = correlation_matrix["target"].sort_values(ascending=False)
