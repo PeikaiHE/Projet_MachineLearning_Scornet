@@ -13,5 +13,14 @@ data = pd.read_csv(path+"train.csv")
 data.info()
 
 missing_values = data.isnull().sum()
-
+print(missing_values)
 data_describe = data.describe()
+print(data.columns)
+# plot 'avg_glucose_level' and 'bmi'
+
+plt.figure(figsize=(12, 6))
+plt.subplot(1, 2, 1)
+sns.distplot(data['avg_glucose_level'])
+plt.subplot(1, 2, 2)
+sns.distplot(data['bmi'])
+plt.show()
