@@ -1,7 +1,7 @@
 # Projet_MachineLearning 
 **E.Scornet**
 
-- Kaggle 链接: https://www.kaggle.com/competitions/optiver-trading-at-the-close
+- Kaggle 链接: https://www.kaggle.com/competitions/playground-series-s3e2/data?select=train.csv
 - Overleaf 链接：https://www.overleaf.com/8326179925tkwfmcgpythz#a0551b
 
 ## 任务分配？
