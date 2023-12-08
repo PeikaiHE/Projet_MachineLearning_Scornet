@@ -1,9 +1,5 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-Created on Thu Dec  7 01:02:38 2023
-
-@author: chenyuxiang
+这个是陈宇翔的code
 """
 
 
