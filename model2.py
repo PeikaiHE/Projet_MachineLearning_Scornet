@@ -36,7 +36,7 @@ data_test = pd.read_csv(path+"test.csv")
 
 data_train = data_train[data_train['gender'] != 'Other']
 
-print(data_train['smoking_status'].value_counts())
+"""print(data_train['smoking_status'].value_counts())
 # 我想知道在smoking_status中，Unknown可以被怎样的三个值解释，也可以检验一下其他三个值中中风的数量
 # 先看看其他三个值中中风的数量，用plot体现出来
 sns.set(style="whitegrid")
@@ -52,7 +52,7 @@ sns.countplot(x='smoking_status', hue='work_type', data=data_train)
 plt.title('Work Type Compté par Smoking Status')  # 添加子图标题
 plt.suptitle('Plots de compté de Smoking Status', fontsize=16, y=1.05)
 plt.tight_layout()
-plt.show()
+plt.show()"""
 
 # 从上面的图表中可以看出，Unknown的值似乎可以被其他的三个条件解释
 # 其中work type = children都是never smoked, 但是其他情况我们还不知道，所以第一步先把这一部分的Unknown定义为never smoked
@@ -65,8 +65,8 @@ data_train.loc[(data_train['smoking_status'] == 'Unknown') & (data_train['work_t
 known_smoking_status = data_train[data_train['smoking_status'] != 'Unknown']
 unknown_smoking_status = data_train[data_train['smoking_status'] == 'Unknown']
 
-# 分离出特征和标签
-X_known = known_smoking_status.drop(['smoking_status'], axis=1)
+# 分离出特征和标签，特征里还要删除掉 'smoking_status' 和'stroke'
+X_known = known_smoking_status.drop(['smoking_status', 'stroke'], axis=1)
 y_known = known_smoking_status['smoking_status']
 X_unknown = unknown_smoking_status.drop(['smoking_status'], axis=1)
 
@@ -90,7 +90,7 @@ preprocessor = ColumnTransformer(
         ('num', numerical_transformer, numerical_columns),
         ('cat', categorical_transformer, categorical_columns)])
 # 分割数据集为训练集和测试集
-X_train, X_test, y_train, y_test = train_test_split(X_known, y_known, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X_known, y_known, test_size=0.3, random_state=42)
 
 """# 进行模型的选择
 models = {
@@ -136,20 +136,25 @@ y_test_tensor = torch.tensor(y_test_encoded).long()
 
 # 创建 Dataset 和 DataLoader
 train_dataset = TensorDataset(X_train_tensor, y_train_tensor)
-train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
+train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True)
 
 # 定义模型
 class Net(nn.Module):
     def __init__(self, input_size, output_size):
         super(Net, self).__init__()
-        self.fc1 = nn.Linear(input_size, 256)
-        self.fc2 = nn.Linear(256, 128)
-        self.fc3 = nn.Linear(128, output_size)
+        self.fc1 = nn.Linear(input_size, 128)
+        self.dropout = nn.Dropout(0.5)
+        self.fc2 = nn.Linear(128, 256)
+        self.l2 = nn.Linear(256, 256)
+        self.l = nn.Linear(256, 128)
+        self.fc4 = nn.Linear(128, output_size)
 
     def forward(self, x):
         x = torch.relu(self.fc1(x))
         x = torch.relu(self.fc2(x))
-        x = self.fc3(x)
+        x = torch.relu(self.l2(x))
+        x = torch.relu(self.l(x))
+        x = self.fc4(x)
         return x
 
 # 输入和输出的大小
@@ -166,9 +171,9 @@ with torch.no_grad():
 
 # 定义损失函数和优化器
 criterion = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+optimizer = torch.optim.Adam(model.parameters(), lr=0.1)
 
-num_epochs = 100
+num_epochs = 1000
 
 # 训练模型
 for epoch in tqdm(range(num_epochs)):
@@ -206,3 +211,28 @@ predicted_labels = label_encoder.inverse_transform(predicted_indices)
 # 评估模型
 print(classification_report(y_test, predicted_labels))
 
+# 使用模型来预测'Unknown'的值
+X_unknown_transformed = preprocessor.transform(X_unknown)
+X_unknown_tensor = torch.tensor(X_unknown_transformed).float()
+
+# 将模型设置为评估模式
+model.eval()
+
+# 预测未知数据
+predicted_indices_unknown = []
+with torch.no_grad():
+    outputs = model(X_unknown_tensor)
+    _, predicted_unknown = torch.max(outputs, 1)
+    predicted_indices_unknown.extend(predicted_unknown.tolist())
+
+predicted_labels_unknown = label_encoder.inverse_transform(predicted_indices_unknown)
+
+# 将预测的标签添加到原始数据中
+data_train_corrected = data_train.copy()
+data_train_corrected.loc[data_train_corrected['smoking_status'] == 'Unknown', 'smoking_status'] = predicted_labels_unknown
+
+# 检查是否还有Unknown的值
+data_train_corrected['smoking_status'].value_counts()
+
+# 保存数据
+data_train_corrected.to_csv(path + 'train_corrected.csv', index=False)
