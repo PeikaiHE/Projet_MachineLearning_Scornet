@@ -107,35 +107,37 @@ for name, model in models.items():
     results[name] = report
 results_df = pd.DataFrame(results).transpose()
 
-# 接下来使用Pytorch来进行模型的训练，我们要对X_train,X_test,y_train,y_test进行转换
-X_train = OneHotEncoder(sparse=False).fit_transform(X_train)
-X_test = OneHotEncoder(sparse=False).fit_transform(X_test)
-y_train = LabelEncoder().fit_transform(y_train)
-y_test = LabelEncoder().fit_transform(y_test)
-
 
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
 
-# 转换为 PyTorch tensors
-X_train_tensor = torch.tensor(X_train.values).float()
-y_train_tensor = torch.tensor(y_train.values).long()
-X_test_tensor = torch.tensor(X_test.values).float()
-y_test_tensor = torch.tensor(y_test.values).long()
+# 应用预处理
+X_train_transformed = preprocessor.fit_transform(X_train)
+X_test_transformed = preprocessor.transform(X_test)
+
+# 如果 y 是分类标签，使用 LabelEncoder 对其编码
+label_encoder = LabelEncoder()
+y_train_encoded = label_encoder.fit_transform(y_train)
+y_test_encoded = label_encoder.transform(y_test)
+
+X_train_tensor = torch.tensor(X_train_transformed).float()
+y_train_tensor = torch.tensor(y_train_encoded).long()
+X_test_tensor = torch.tensor(X_test_transformed).float()
+y_test_tensor = torch.tensor(y_test_encoded).long()
 
 # 创建 Dataset 和 DataLoader
-dataset = TensorDataset(X_tensor, y_tensor)
-train_loader = DataLoader(dataset, batch_size=64, shuffle=True)
+train_dataset = TensorDataset(X_train_tensor, y_train_tensor)
+train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
 
 # 定义模型
 class Net(nn.Module):
-    def __init__(self):
+    def __init__(self, input_size, output_size):
         super(Net, self).__init__()
-        self.fc1 = nn.Linear(X.shape[1], 128)
+        self.fc1 = nn.Linear(input_size, 128)
         self.fc2 = nn.Linear(128, 64)
-        self.fc3 = nn.Linear(64, len(torch.unique(y_tensor)))  # 输出层的大小等于类别数
+        self.fc3 = nn.Linear(64, output_size)
 
     def forward(self, x):
         x = torch.relu(self.fc1(x))
@@ -143,11 +145,23 @@ class Net(nn.Module):
         x = self.fc3(x)
         return x
 
-model = Net()
+# 输入和输出的大小
+input_size = X_train_transformed.shape[1]
+output_size = len(torch.unique(y_train_tensor))
+
+model = Net(input_size, output_size)
+
+"""model.eval()
+
+# 关闭梯度计算
+with torch.no_grad():
+    y_pred_tensor = model(X_test_tensor)"""
 
 # 定义损失函数和优化器
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+
+num_epochs = 100
 
 # 训练模型
 for epoch in range(num_epochs):
@@ -163,12 +177,25 @@ for epoch in range(num_epochs):
 
     print(f'Epoch {epoch+1}/{num_epochs}, Loss: {loss.item()}')
 
+# 将模型设置为评估模式
+model.eval()
 
-# 预测已知吸烟状态的测试集
-y_pred = model.predict(X_test)
+# 初始化一个列表来存储预测标签
+predicted_indices = []
+
+# 关闭梯度计算
+with torch.no_grad():
+    for inputs in DataLoader(X_test_tensor, batch_size=64):
+        # 前向传播来获取模型的预测结果
+        outputs = model(inputs)
+        # 获取最大概率的索引，这是预测的类别标签
+        _, predicted = torch.max(outputs, 1)
+        # 将预测标签添加到列表中
+        predicted_indices.extend(predicted.tolist())
+
+# 如果需要，将预测标签转换回原始的类别名称（如果使用了 LabelEncoder）
+predicted_labels = label_encoder.inverse_transform(predicted_indices)
 
 # 评估模型
-print(classification_report(y_test, y_pred))
+print(classification_report(y_test, predicted_labels))
 
-# 预测未知吸烟状态的数据
-predicted_smoking_status = model.predict(X_unknown)
