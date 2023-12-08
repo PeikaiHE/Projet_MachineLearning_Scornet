@@ -1,4 +1,8 @@
-"""这一步我们不能删除Unknown的值了，因为之前所得到的结果不好"""
+"""
+首先用深度学习来预测Unknown可以如何分配给其他的三种吸烟情况。
+
+之后组成更完整的数据之后可以使用传统的机器学习方法进行预测，也可以使用深度学习预测
+"""
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -196,7 +200,7 @@ with torch.no_grad():
         # 将预测标签添加到列表中
         predicted_indices.extend(predicted.tolist())
 
-# 如果需要，将预测标签转换回原始的类别名称（如果使用了 LabelEncoder）
+# 将预测标签转换回原始的类别名称
 predicted_labels = label_encoder.inverse_transform(predicted_indices)
 
 # 评估模型
