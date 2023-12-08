@@ -20,6 +20,9 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.svm import SVC
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neural_network import MLPClassifier
+from tqdm import tqdm
+from time import sleep
+
 
 
 path = "/Users/hepeikai/Library/CloudStorage/OneDrive-个人/Master_ISDS_Sorbonne/S3/Apprentissage Statistique_/data/"
@@ -85,7 +88,7 @@ preprocessor = ColumnTransformer(
 # 分割数据集为训练集和测试集
 X_train, X_test, y_train, y_test = train_test_split(X_known, y_known, test_size=0.2, random_state=42)
 
-# 进行模型的选择
+"""# 进行模型的选择
 models = {
     "Logistic Regression": LogisticRegression(max_iter=1000),
     "K-Nearest Neighbors": KNeighborsClassifier(),
@@ -105,7 +108,7 @@ for name, model in models.items():
     # 评估模型并且记录
     report = classification_report(y_test, y_pred, output_dict=True)
     results[name] = report
-results_df = pd.DataFrame(results).transpose()
+results_df = pd.DataFrame(results).transpose()"""
 
 
 import torch
@@ -135,9 +138,9 @@ train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
 class Net(nn.Module):
     def __init__(self, input_size, output_size):
         super(Net, self).__init__()
-        self.fc1 = nn.Linear(input_size, 128)
-        self.fc2 = nn.Linear(128, 64)
-        self.fc3 = nn.Linear(64, output_size)
+        self.fc1 = nn.Linear(input_size, 256)
+        self.fc2 = nn.Linear(256, 128)
+        self.fc3 = nn.Linear(128, output_size)
 
     def forward(self, x):
         x = torch.relu(self.fc1(x))
@@ -164,7 +167,7 @@ optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 num_epochs = 100
 
 # 训练模型
-for epoch in range(num_epochs):
+for epoch in tqdm(range(num_epochs)):
     for inputs, labels in train_loader:
         # 前向传播
         outputs = model(inputs)
@@ -175,7 +178,7 @@ for epoch in range(num_epochs):
         loss.backward()
         optimizer.step()
 
-    print(f'Epoch {epoch+1}/{num_epochs}, Loss: {loss.item()}')
+    #print(f'Epoch {epoch+1}/{num_epochs}, Loss: {loss.item()}')
 
 # 将模型设置为评估模式
 model.eval()
