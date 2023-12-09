@@ -185,6 +185,7 @@ num_epochs = 100
 early_stopping_patience = 50
 losses = []
 accuracies = []
+val_loader = DataLoader(TensorDataset(X_test_tensor, y_test_tensor), batch_size=128)
 # 训练模型
 for epoch in tqdm(range(num_epochs)):
     model.train()
@@ -200,12 +201,20 @@ for epoch in tqdm(range(num_epochs)):
         optimizer.step()
         running_loss += loss.item()
 
-    # 计算验证损失
+    model.eval()
     val_loss = 0.0
-    # 早停逻辑
+    with torch.no_grad():
+        for val_inputs, val_labels in val_loader:
+            val_outputs = model(val_inputs)
+            val_loss += criterion(val_outputs, val_labels).item()
+    val_loss /= len(val_loader)
+
+    # 更新最小验证损失和耐心
     if val_loss < min_val_loss:
         min_val_loss = val_loss
         patience = 0
+        # 保存模型
+        torch.save(model.state_dict(), path + 'model.pth')
     else:
         patience += 1
         if patience >= early_stopping_patience:
@@ -218,11 +227,11 @@ for epoch in tqdm(range(num_epochs)):
 # 画出"Cross-entropy" 和 Accuracy 的图表
 plt.figure(figsize=(12, 4))
 plt.subplot(1, 2, 1)
-plt.plot(range(patience), losses[-patience - 1:])
+plt.plot(range(patience+1), losses[-patience - 1:])
 plt.xlabel('Epoch')
 plt.ylabel('Loss')
 plt.subplot(1, 2, 2)
-plt.plot(range(patience), accuracies[-patience - 1:])
+plt.plot(range(patience+1), accuracies[-patience - 1:])
 plt.xlabel('Epoch')
 plt.ylabel('Accuracy')
 plt.show()
