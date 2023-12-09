@@ -18,6 +18,8 @@ from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import classification_report
+
 
 
 path = "/Users/hepeikai/Library/CloudStorage/OneDrive-个人/Master_ISDS_Sorbonne/S3/Apprentissage Statistique_/data/"
@@ -82,14 +84,71 @@ preprocessor = ColumnTransformer(
 
 # 应用预处理并分割数据集
 X_preprocessed = preprocessor.fit_transform(X)
-X_train, X_test, y_train, y_test = train_test_split(X_preprocessed, data_train['stroke'], test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X_preprocessed, data_train['stroke'], test_size=0.25, random_state=42)
 
 # 初始化模型
+# Régression logistique L1
+log_reg_l1 = LogisticRegression(penalty='l1', C = 1.0,solver='liblinear', max_iter=1000)
+log_reg_l1.fit(X_train, y_train)
+y_pred = log_reg_l1.predict(X_test)
+print(classification_report(y_test, y_pred))
+# Régression logistique L2
+log_reg_l2 = LogisticRegression(penalty='l2', C = 1.0,solver='lbfgs', max_iter=1000)
+log_reg_l2.fit(X_train, y_train)
+y_pred = log_reg_l2.predict(X_test)
+print(classification_report(y_test, y_pred))
+# Modèle Random Forest
+from sklearn.ensemble import RandomForestClassifier
+rf = RandomForestClassifier(n_estimators=50, max_depth=10, random_state=0)
+rf.fit(X_train, y_train)
+y_pred = rf.predict(X_test)
+print(classification_report(y_test, y_pred))
+# Modèle Gradient Boosting Machine
+from sklearn.ensemble import GradientBoostingClassifier
+gbm = GradientBoostingClassifier(n_estimators=50, learning_rate=0.1, random_state=0)
+gbm.fit(X_train, y_train)
+y_pred = gbm.predict(X_test)
+print(classification_report(y_test, y_pred))
+# Modèle Extreme Gradient Boosting
+from xgboost import XGBClassifier
+xgb = XGBClassifier(n_estimators=50, learning_rate=0.1, random_state=0)
+xgb.fit(X_train, y_train)
+y_pred = xgb.predict(X_test)
+print(classification_report(y_test, y_pred))
+# SVM
+svc = SVC(gamma='auto')
+svc.fit(X_train, y_train)
+y_pred = svc.predict(X_test)
+print(classification_report(y_test, y_pred))
+# KNN
+knn = KNeighborsClassifier()
+knn.fit(X_train, y_train)
+y_pred = knn.predict(X_test)
+print(classification_report(y_test, y_pred))
+# Decision Tree
+dt = DecisionTreeClassifier()
+dt.fit(X_train, y_train)
+y_pred = dt.predict(X_test)
+print(classification_report(y_test, y_pred))
+# Naive Bayes
+nb = GaussianNB()
+nb.fit(X_train, y_train)
+y_pred = nb.predict(X_test)
+print(classification_report(y_test, y_pred))
+# Neural Network
+nn = MLPClassifier(max_iter=1000)
+nn.fit(X_train, y_train)
+y_pred = nn.predict(X_test)
+print(classification_report(y_test, y_pred))
 models = {
-    "Logistic Regression": LogisticRegression(max_iter=1000),
+    "Logistic Regression L1": LogisticRegression(penalty='l1', C = 1.0,solver='liblinear', max_iter=1000),
+    "Logistic Regression L2": LogisticRegression(penalty='l2', C = 1.0,solver='lbfgs', max_iter=1000),
+    "Random Forest": RandomForestClassifier(n_estimators=50, max_depth=10, random_state=0),
+    "Gradient Boosting Machine": GradientBoostingClassifier(n_estimators=50, learning_rate=0.1, random_state=0),
+    "Extreme Gradient Boosting": XGBClassifier(n_estimators=50, learning_rate=0.1, random_state=0),
+    "Support Vector Machine": SVC(gamma='auto'),
     "K-Nearest Neighbors": KNeighborsClassifier(),
     "Decision Tree": DecisionTreeClassifier(),
-    "Support Vector Machine": SVC(),
     "Naive Bayes": GaussianNB(),
     "Neural Network": MLPClassifier(max_iter=1000)
 }
@@ -123,41 +182,33 @@ for name, metrics in results.items():
     }, ignore_index=True)
 results_df.to_csv(path + 'model_performance_results.csv', index=False)
 
-# 在经过分析之后，我们决定使用logistic regression进行建模
-
-# 设置逻辑回归模型的参数网格
-param_grid = {
-    'C': [0.001, 0.01, 0.1, 1, 10, 100],  # 正则化强度的倒数
-    'penalty': ['l1', 'l2'],               # 使用的惩罚项
-    'solver': ['liblinear', 'saga']        # 优化算法
+# 在经过分析之后，我们决定使用XGBoost进行建模
+param = {
+    'n_estimators': [50, 100, 150, 200],
+    'learning_rate': [0.1, 0.01, 0.001],
+    'max_depth': [3, 5, 10],
 }
-
-# 配置网格搜索
-log_reg = LogisticRegression(max_iter=1000,random_state=42)
-grid_search = GridSearchCV(log_reg, param_grid, cv=5, scoring='accuracy')
-
-# 拟合网格搜索
+xgb1 = XGBClassifier(random_state=2)
+grid_search = GridSearchCV(xgb1, param, cv=5, scoring='accuracy')
 grid_search.fit(X_train, y_train)
-
-# 获取最佳参数和最佳模型
 best_parameters = grid_search.best_params_
 best_model = grid_search.best_estimator_
+print('Best parameters:', best_parameters) #Best parameters: {'learning_rate': 0.01, 'max_depth': 3, 'n_estimators': 50}
+print('Best model score:', grid_search.best_score_) #Best model score: 0.9522924411400246
 
-# 输出最佳参数和最佳模型的得分
-print('Best parameters:', best_parameters) #Best parameters: {'C': 0.01, 'penalty': 'l2', 'solver': 'liblinear'}
-print('Best model score:', grid_search.best_score_) #Best model score: 0.9519051735715331
 # 找到了最佳的参数，我们就可以使用最佳的参数进行建模了
-log_reg1 = LogisticRegression(C = 0.01, penalty = 'l2', solver = 'liblinear', max_iter = 1000, random_state = 42)
-log_reg1.fit(X_train, y_train)
-y_pred = log_reg1.predict(X_test)
+xgb2 = XGBClassifier(n_estimators=50, learning_rate=0.01, max_depth=3, random_state=2)
+xgb2.fit(X_train, y_train)
+y_pred = xgb2.predict(X_test)
 accuracy = accuracy_score(y_test, y_pred)
 precision = precision_score(y_test, y_pred, average='weighted')
 recall = recall_score(y_test, y_pred, average='weighted')
 f1 = f1_score(y_test, y_pred, average='weighted')
-print(f'Accuracy:{accuracy:.3f}') #Accuracy: 0.950
-print(f'Precision:{precision:.3f}') #Precision: 0.936
-print(f'Recall:{recall:.3f}') #Recall: 0.950
-print(f'F1 Score:{f1:.3f}') #F1 Score: 0.927
+print(f'Accuracy:{accuracy:.3f}') #Accuracy:0.948
+print(f'Precision:{precision:.3f}') #Precision:0.899
+print(f'Recall:{recall:.3f}') #Recall:0.948
+print(f'F1 Score:{f1:.3f}') #F1 Score:0.923
+# 计算错误率
 misclassified_count = len(y_test[y_test != y_pred])
 total_cases = len(y_test)
 error_rate = misclassified_count / total_cases * 100
@@ -171,7 +222,7 @@ y_test1 = pd.read_csv(path + 'sample_submission.csv')
 y_test1 = y_test1[y_test1['id'].isin(test_id)]
 print(sum(y_test1['stroke']) / len(y_test1['stroke']))
 X_test_preprocessed1 = preprocessor.transform(X_test1)
-y_pred1 = log_reg1.predict(X_test_preprocessed1)
+y_pred1 = xgb2.predict(X_test_preprocessed1)
 print(np.count_nonzero(y_pred1))
 print(sum(y_pred1) / len(y_pred1))
 # 我tm怎么发现差距这么多？ 是不是因为把unknown的值给去掉了？
