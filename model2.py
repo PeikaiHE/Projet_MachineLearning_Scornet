@@ -26,6 +26,8 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.neural_network import MLPClassifier
 from tqdm import tqdm
 from time import sleep
+from sklearn.utils.class_weight import compute_class_weight
+
 
 
 
@@ -143,15 +145,13 @@ class Net(nn.Module):
     def __init__(self, input_size, output_size):
         super(Net, self).__init__()
         self.fc1 = nn.Linear(input_size, 128)
-        self.dropout = nn.Dropout(0.5)
-        self.fc2 = nn.Linear(128, 256)
-        self.l2 = nn.Linear(256, 256)
-        self.l = nn.Linear(256, 128)
-        self.fc4 = nn.Linear(128, output_size)
+        self.dropout = nn.Dropout(0.2)
+        self.l2 = nn.Linear(128, 128)
+        self.l = nn.Linear(128, 64)
+        self.fc4 = nn.Linear(64, output_size)
 
     def forward(self, x):
         x = torch.relu(self.fc1(x))
-        x = torch.relu(self.fc2(x))
         x = torch.relu(self.l2(x))
         x = torch.relu(self.l(x))
         x = self.fc4(x)
@@ -169,14 +169,26 @@ model = Net(input_size, output_size)
 with torch.no_grad():
     y_pred_tensor = model(X_test_tensor)"""
 
+# 计算类别权重
+class_weights = compute_class_weight('balanced', classes=np.unique(y_train), y=y_train)
+class_weights_tensor = torch.tensor(class_weights, dtype=torch.float32)
+
+# 应用类别权重
+criterion = nn.CrossEntropyLoss(weight=class_weights_tensor)
+
 # 定义损失函数和优化器
-criterion = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=0.1)
+optimizer = torch.optim.Adam(model.parameters(), lr=0.001)  # 降低学习率
 
-num_epochs = 1000
-
+min_val_loss = np.inf
+patience = 0
+num_epochs = 100
+early_stopping_patience = 50
+losses = []
+accuracies = []
 # 训练模型
 for epoch in tqdm(range(num_epochs)):
+    model.train()
+    running_loss = 0.0
     for inputs, labels in train_loader:
         # 前向传播
         outputs = model(inputs)
@@ -186,8 +198,34 @@ for epoch in tqdm(range(num_epochs)):
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+        running_loss += loss.item()
 
+    # 计算验证损失
+    val_loss = 0.0
+    # 早停逻辑
+    if val_loss < min_val_loss:
+        min_val_loss = val_loss
+        patience = 0
+    else:
+        patience += 1
+        if patience >= early_stopping_patience:
+            print(f"Stopping early at epoch {epoch + 1}")
+            break
     #print(f'Epoch {epoch+1}/{num_epochs}, Loss: {loss.item()}')
+    losses.append(loss.item())
+    accuracies.append((outputs.argmax(1) == labels).float().mean())
+
+# 画出"Cross-entropy" 和 Accuracy 的图表
+plt.figure(figsize=(12, 4))
+plt.subplot(1, 2, 1)
+plt.plot(range(patience), losses[-patience - 1:])
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.subplot(1, 2, 2)
+plt.plot(range(patience), accuracies[-patience - 1:])
+plt.xlabel('Epoch')
+plt.ylabel('Accuracy')
+plt.show()
 
 # 将模型设置为评估模式
 model.eval()
