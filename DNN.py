@@ -93,7 +93,6 @@ model.load_state_dict(torch.load(path + 'model.pth'))
 model.eval()
 # 初始化一个列表来存储预测标签
 predicted_indices = []
-
 # 关闭梯度计算
 with torch.no_grad():
     for inputs in DataLoader(X_test_tensor, batch_size=64):
