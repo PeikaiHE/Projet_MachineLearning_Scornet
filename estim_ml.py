@@ -28,7 +28,7 @@ path = "/Users/hepeikai/Library/CloudStorage/OneDrive-个人/Master_ISDS_Sorbonn
 data_train = pd.read_csv(path + "train_corrected.csv")
 data_test = pd.read_csv(path + "test.csv")
 y_real = pd.read_csv(path + "sample_submission.csv")
-
+print(data_train.columns)
 # 把数据分成X和y
 X = data_train.drop(['id', 'stroke'], axis=1)
 y = data_train['stroke']
@@ -126,7 +126,4 @@ y_model = log_reg1.predict(X_preprocessed)
 # 看看我们的模型的预测结果以及不同值的数量
 unique, counts = np.unique(y_model, return_counts=True)
 print("Our model's prediction:", dict(zip(unique, counts)))
-
-print("Our model's mean is:", y_model.mean())
-
 print("The real means is:", y_real['stroke'][0])

@@ -147,7 +147,7 @@ best_model = grid_search.best_estimator_
 print('Best parameters:', best_parameters) #Best parameters: {'C': 0.01, 'penalty': 'l2', 'solver': 'liblinear'}
 print('Best model score:', grid_search.best_score_) #Best model score: 0.9519051735715331
 # 找到了最佳的参数，我们就可以使用最佳的参数进行建模了
-log_reg1 = LogisticRegression(C=0.01, penalty='l2', solver='liblinear',max_iter=1000,random_state=42)
+log_reg1 = LogisticRegression(C = 0.01, penalty = 'l2', solver = 'liblinear', max_iter = 1000, random_state = 42)
 log_reg1.fit(X_train, y_train)
 y_pred = log_reg1.predict(X_test)
 accuracy = accuracy_score(y_test, y_pred)
