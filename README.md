@@ -41,3 +41,4 @@
 - `DNN.py` : 这个是使用`model2.py`中的模型对`test.py`中的数据进行处理，得到一个修改过的`test_corrected.csv`，之后使用这个数据集进行普通机器学习。
 - `estim_ml.py` : 这一步使用的是经过`model2.py`&`DNN.py`的深度网络处理过的数据集，找到最合适的机器学习模型（实际上就是重复了一下`model1.py`中机器学习的步骤）
 - `model_weighted.py` : 这一步使用的是经过`model2.py`&`DNN.py`的深度网络处理过的数据集，之后再使用`estim_ml.py`中的模型进行建模。 得到的模型已经不错了
+- `model_nn.py` : 这一步使用的是经过`model2.py`&`DNN.py`的深度网络处理过的数据集，之后使用深度学习进行建模。 得到的模型已经也不错了
