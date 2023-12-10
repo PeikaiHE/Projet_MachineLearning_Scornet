@@ -32,3 +32,11 @@
 #### 为什么我们的模型准确率没有非常高
 我觉得是因为在classification的时候，我们的数据集是不平衡的，所以我们的模型会倾向于预测`stroke == 0`的情况，而不是`stroke == 1`的情况。
 这就导致了在准确率等方面的反馈不错，但是和官方的数据相比有差距。
+
+### 针对于各个python文件的解释
+- `analyse.py` : 这个是陈宇翔的code
+- `zhang_xu.py`, `test xu.ipynb` : 这个是张旭的code
+- `model1.py` : 这个是我们project的第一步。使用去掉 `smoking_status == 'Unknown' ` 和 `gender == Other` 的数据集直接进行建模。 找到最好的模型，之后找到最好的param。
+- `model2.py` : 使用深度学习针对`smoking_status == 'Unknown' `进行建模，之后使用这个数据集进行普通机器学习。
+- `estim_ml.py` : 这一步使用的是经过`model2.py`的深度网络处理过的数据集，找到最合适的机器学习模型（实际上就是重复了一下`model1.py`中机器学习的步骤）
+- `model_weighted.py` : 这一步使用的是经过`model2.py`的深度网络处理过的数据集，之后再使用`estim_ml.py`中的模型进行建模。 得到的模型已经不错了
