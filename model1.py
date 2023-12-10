@@ -19,8 +19,9 @@ from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import classification_report
-
-
+from xgboost import XGBClassifier
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.ensemble import RandomForestClassifier
 
 path = "/Users/hepeikai/Library/CloudStorage/OneDrive-个人/Master_ISDS_Sorbonne/S3/Apprentissage Statistique_/data/"
 
@@ -51,7 +52,6 @@ plt.title('BMI Distribution')  # 添加子图标题
 plt.suptitle('Distribution of Age, Average Glucose Level, and BMI', fontsize=16, y=1.05)
 plt.tight_layout()
 plt.show()
-
 
 
 # 删除不确定的值
@@ -98,19 +98,16 @@ log_reg_l2.fit(X_train, y_train)
 y_pred = log_reg_l2.predict(X_test)
 print(classification_report(y_test, y_pred))
 # Modèle Random Forest
-from sklearn.ensemble import RandomForestClassifier
 rf = RandomForestClassifier(n_estimators=50, max_depth=10, random_state=0)
 rf.fit(X_train, y_train)
 y_pred = rf.predict(X_test)
 print(classification_report(y_test, y_pred))
 # Modèle Gradient Boosting Machine
-from sklearn.ensemble import GradientBoostingClassifier
 gbm = GradientBoostingClassifier(n_estimators=50, learning_rate=0.1, random_state=0)
 gbm.fit(X_train, y_train)
 y_pred = gbm.predict(X_test)
 print(classification_report(y_test, y_pred))
 # Modèle Extreme Gradient Boosting
-from xgboost import XGBClassifier
 xgb = XGBClassifier(n_estimators=50, learning_rate=0.1, random_state=0)
 xgb.fit(X_train, y_train)
 y_pred = xgb.predict(X_test)
