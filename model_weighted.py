@@ -66,9 +66,10 @@ test_id = X_test1['id']
 X_test1 = X_test1.drop(['id'], axis=1)
 y_test1 = pd.read_csv(path + 'sample_submission.csv')
 y_test1 = y_test1[y_test1['id'].isin(test_id)]
-print(sum(y_test1['stroke']) / len(y_test1['stroke']))
+print(sum(y_test1['stroke']) / len(y_test1['stroke'])) # 0.041296393099851524
 X_test_preprocessed1 = preprocessor.transform(X_test1)
 y_pred1 = model.predict(X_test_preprocessed1)
-print(np.count_nonzero(y_pred1))
-print(sum(y_pred1) / len(y_pred1))
+print(np.count_nonzero(y_pred1)) #417
+print(sum(y_pred1) / len(y_pred1)) # 0.040870332255219056
+
 
