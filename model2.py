@@ -283,11 +283,27 @@ data_train_corrected.to_csv(path + 'train_corrected.csv', index=False)
 
 # 进行原始数据和新分配数据的对比
 data_train_corrected = pd.read_csv(path + 'train_corrected.csv')
+# 将数据标注在图片所对应的柱状图上面
 fig, axes = plt.subplots(1, 2, figsize=(15, 5))
 sns.countplot(data=data_train, x='smoking_status', hue='stroke', ax=axes[0])
-axes[0].set_title('Data Originale')
+axes[0].set_title('Smoking Status Before Correction')
+# 在第一个图上添加数据标签
+for p in axes[0].patches:
+    axes[0].annotate(f'{int(p.get_height())}',
+                     (p.get_x() + p.get_width() / 2., p.get_height()),
+                     ha='center', va='center',
+                     xytext=(0, 5), textcoords='offset points')
+
+# 第二个图
 sns.countplot(data=data_train_corrected, x='smoking_status', hue='stroke', ax=axes[1])
-axes[1].set_title('Data Correcté')
+axes[1].set_title('Smoking Status After Correction')
+# 在第二个图上添加数据标签
+for p in axes[1].patches:
+    axes[1].annotate(f'{int(p.get_height())}',
+                     (p.get_x() + p.get_width() / 2., p.get_height()),
+                     ha='center', va='center',
+                     xytext=(0, 5), textcoords='offset points')
+
 plt.tight_layout()
 plt.show()
 

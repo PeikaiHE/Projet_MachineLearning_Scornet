@@ -52,11 +52,12 @@ X_train, X_test, y_train, y_test = train_test_split(X_preprocessed, data_train['
 
 # 2. 进行加权
 from sklearn.utils.class_weight import compute_class_weight
-class_weight = compute_class_weight(class_weight='balanced', classes=np.unique(y_test), y=y_test)
-class_weight = dict(enumerate(class_weight))
-print(class_weight)
-class_weights = {0: 1, 1: 4.9}
-print(data_train['smoking_status'].value_counts())
+"""class_weight = compute_class_weight(class_weight='balanced', classes=np.unique(y_train), y=y_train)
+class_weights = dict(enumerate(class_weight))
+print(class_weights)"""
+
+class_weights = {0: 1, 1: 5}
+
 # 3. 进行训练 SVM
 model = SVC(class_weight=class_weights,gamma='auto')
 model.fit(X_train, y_train)
@@ -69,10 +70,42 @@ test_id = X_test1['id']
 X_test1 = X_test1.drop(['id'], axis=1)
 y_test1 = pd.read_csv(path + 'sample_submission.csv')
 y_test1 = y_test1[y_test1['id'].isin(test_id)]
-print(sum(y_test1['stroke']) / len(y_test1['stroke'])) # 0.041296393099851524
+print(f"moyenne officiel {sum(y_test1['stroke']) / len(y_test1['stroke']) :.4f}") # 0.041296393099851524
 X_test_preprocessed1 = preprocessor.transform(X_test1)
 y_pred1 = model.predict(X_test_preprocessed1)
 print(np.count_nonzero(y_pred1)) #417
-print(sum(y_pred1) / len(y_pred1)) # 0.040870332255219056
+print(f"nos moyenne {sum(y_pred1) / len(y_pred1):.4f} ") # 0.040870332255219056
 
 
+# 4. 进行训练 Random Forest
+"""best_weight = 0
+best_recall = 0
+for i in range(45, 55):
+    class_weights = {0: 1, 1: i/10}
+    model = RandomForestClassifier(n_estimators=50, max_depth=10, random_state=0, class_weight=class_weights)
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    recall = recall_score(y_test, y_pred)
+    if recall > best_recall:
+        best_recall = recall
+        best_weight = i/10
+print(best_recall)
+print(best_weight)"""
+"""class_weight = compute_class_weight(class_weight='balanced', classes=np.unique(y_train), y=y_train)
+class_weights1 = dict(enumerate(class_weight))
+print(class_weights1)"""
+class_weights1 = {0: 1, 1: 8.5}
+modelRF = RandomForestClassifier(n_estimators=50, max_depth=10, random_state=0, class_weight=class_weights1)
+modelRF.fit(X_train, y_train)
+y_pred = modelRF.predict(X_test)
+print(classification_report(y_test, y_pred))
+
+X_test2 = data_test.copy()
+test_id = X_test2['id']
+X_test2 = X_test2.drop(['id'], axis=1)
+y_test2 = pd.read_csv(path + 'sample_submission.csv')
+y_test2 = y_test2[y_test2['id'].isin(test_id)]
+X_test_preprocessed2 = preprocessor.transform(X_test2)
+y_pred2 = modelRF.predict(X_test_preprocessed2)
+print(np.count_nonzero(y_pred2)) #417
+print(f"nos moyenne {sum(y_pred2) / len(y_pred2)} ") # 0.040870332255219056
