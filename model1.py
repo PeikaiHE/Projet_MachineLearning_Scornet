@@ -186,7 +186,7 @@ param = {
     'max_depth': [3, 5, 10],
 }
 xgb1 = XGBClassifier(random_state=2)
-grid_search = GridSearchCV(xgb1, param, cv=5, scoring='accuracy')
+grid_search = GridSearchCV(xgb1, param, cv=5, scoring='recall')
 grid_search.fit(X_train, y_train)
 best_parameters = grid_search.best_params_
 best_model = grid_search.best_estimator_
@@ -194,7 +194,7 @@ print('Best parameters:', best_parameters) #Best parameters: {'learning_rate': 0
 print('Best model score:', grid_search.best_score_) #Best model score: 0.9522924411400246
 
 # 找到了最佳的参数，我们就可以使用最佳的参数进行建模了
-xgb2 = XGBClassifier(n_estimators=50, learning_rate=0.01, max_depth=3, random_state=2)
+xgb2 = XGBClassifier(n_estimators=150, learning_rate=0.1, max_depth=10, random_state=2)
 xgb2.fit(X_train, y_train)
 y_pred = xgb2.predict(X_test)
 accuracy = accuracy_score(y_test, y_pred)

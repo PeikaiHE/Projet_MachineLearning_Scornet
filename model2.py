@@ -28,14 +28,11 @@ from tqdm import tqdm
 from time import sleep
 from sklearn.utils.class_weight import compute_class_weight
 
-
-
-
 path = "/Users/hepeikai/Library/CloudStorage/OneDrive-个人/Master_ISDS_Sorbonne/S3/Apprentissage Statistique_/data/"
 
 data_train = pd.read_csv(path+"train.csv")
 data_test = pd.read_csv(path+"test.csv")
-
+print(data_train['smoking_status'].value_counts())
 data_train = data_train[data_train['gender'] != 'Other']
 
 """print(data_train['smoking_status'].value_counts())
@@ -181,8 +178,8 @@ optimizer = torch.optim.Adam(model.parameters(), lr=0.001)  # 降低学习率
 
 min_val_loss = np.inf
 patience = 0
-num_epochs = 100
-early_stopping_patience = 50
+num_epochs = 1000
+early_stopping_patience = 666
 losses = []
 accuracies = []
 val_loader = DataLoader(TensorDataset(X_test_tensor, y_test_tensor), batch_size=128)
@@ -233,7 +230,7 @@ plt.ylabel('Loss')
 plt.subplot(1, 2, 2)
 plt.plot(range(patience+1), accuracies[-patience - 1:])
 plt.xlabel('Epoch')
-plt.ylabel('Accuracy')
+plt.ylabel('Accuracies')
 plt.show()
 
 # 将模型设置为评估模式
@@ -283,3 +280,16 @@ data_train_corrected['smoking_status'].value_counts()
 
 # 保存数据
 data_train_corrected.to_csv(path + 'train_corrected.csv', index=False)
+
+# 进行原始数据和新分配数据的对比
+data_train_corrected = pd.read_csv(path + 'train_corrected.csv')
+fig, axes = plt.subplots(1, 2, figsize=(15, 5))
+sns.countplot(data=data_train, x='smoking_status', hue='stroke', ax=axes[0])
+axes[0].set_title('Data Originale')
+sns.countplot(data=data_train_corrected, x='smoking_status', hue='stroke', ax=axes[1])
+axes[1].set_title('Data Correcté')
+plt.tight_layout()
+plt.show()
+
+print(data_train['smoking_status'].value_counts())
+print(data_train_corrected['smoking_status'].value_counts())

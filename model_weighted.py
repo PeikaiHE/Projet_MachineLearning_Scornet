@@ -52,8 +52,11 @@ X_train, X_test, y_train, y_test = train_test_split(X_preprocessed, data_train['
 
 # 2. 进行加权
 from sklearn.utils.class_weight import compute_class_weight
+class_weight = compute_class_weight(class_weight='balanced', classes=np.unique(y_test), y=y_test)
+class_weight = dict(enumerate(class_weight))
+print(class_weight)
 class_weights = {0: 1, 1: 4.9}
-
+print(data_train['smoking_status'].value_counts())
 # 3. 进行训练 SVM
 model = SVC(class_weight=class_weights,gamma='auto')
 model.fit(X_train, y_train)
