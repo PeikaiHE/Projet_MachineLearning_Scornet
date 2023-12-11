@@ -24,12 +24,12 @@ class Net(nn.Module):
         self.fc1 = nn.Linear(input_size, 64)
         self.dropout = nn.Dropout(0.2)
         self.l2 = nn.Linear(64, 128)
-        self.fc2 = nn.Linear(128, 64)
+        self.l = nn.Linear(128, 64)
         self.fc4 = nn.Linear(64, output_size)
     def forward(self, x):
         x = torch.relu(self.fc1(x))
         x = torch.relu(self.l2(x))
-        x = torch.relu(self.fc2(x))
+        x = torch.relu(self.l(x))
         x = self.fc4(x)
         return x
 
@@ -82,9 +82,8 @@ output_size = len(torch.unique(y_train_tensor))
 model = Net(input_size, output_size)
 
 # 计算类别权重
-#class_weights = compute_class_weight(class_weight='balanced', classes=np.unique(y_train), y=y_train)
-#print(class_weights)
-class_weights = [1, 8]
+class_weights = compute_class_weight(class_weight='balanced', classes=np.unique(y_train), y=y_train)
+print(class_weights)
 class_weights_tensor = torch.tensor(class_weights, dtype=torch.float32)
 
 # 应用类别权重
