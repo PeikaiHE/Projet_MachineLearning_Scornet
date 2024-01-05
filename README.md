@@ -3,6 +3,8 @@
 
 - Kaggle 链接: https://www.kaggle.com/competitions/playground-series-s3e2/data
 - Overleaf 链接：https://www.overleaf.com/8326179925tkwfmcgpythz#a0551b
+- 任务分配链接：https://acrobat.adobe.com/id/urn:aaid:sc:AP:956ce5a8-9cde-4785-8cf5-c67ffcc46c27
+- PPT链接：https://www.canva.com/design/DAF5ARoBOJo/BgdHEb0TlEK3i7fXBtqwNA/edit?utm_content=DAF5ARoBOJo&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
 
 ## Projet 结构
 
